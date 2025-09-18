@@ -7,4 +7,4 @@ app = FastAPI(
     version="0.1.0",
 )
 
-app.include_router(forecast.router, prefix="/forecast")
+app.include_router(forecast.router, prefix="/forecast", tags=["Forecast"])
