@@ -8,8 +8,10 @@ with open("app/data/data.json") as f:
 
 
 def get_available_months() -> List[str]:
-    months = {entry["month"] for entry in DATA}  # set ensures uniqueness
-    return sorted(months)
+    return {entry["month"] for entry in DATA}  # set ensures uniqueness
+
+def get_available_countries() -> List[str]:
+    return sorted({entry["country_id"] for entry in DATA})
 
 
 def get_available_cells() -> List[dict]:
@@ -28,42 +30,33 @@ def get_available_cells() -> List[dict]:
     return cells
 
 
-def get_forecast_by_cell(cell_ids: Optional[List[int]] = None, months: Optional[List[str]] = None, metrics: Optional[List[str]] = None):
+def get_forecast_by_cell(
+    cell_ids: Optional[List[int]] = None,
+    metrics: Optional[List[str]] = None
+):
+    results = DATA
     if cell_ids:
-        results = [entry for entry in DATA if entry["grid_id"] in cell_ids]
-    else:
-        results = DATA.copy()  # cell_id指定なしなら全件取得
-    if months:
-        results = [r for r in results if r["month"] in months]
+        results = [r for r in results if r["grid_id"] in cell_ids]
     if metrics:
-        for r in results:
-            keys_to_keep = ["grid_id", "month"] + metrics
-            for key in list(r.keys()):
-                if key not in keys_to_keep:
-                    r.pop(key)
+        results = [
+            {k: v for k, v in r.items() if k in ["grid_id", "month"] + metrics}
+            for r in results
+        ]
     return results
 
 
 def get_forecast_by_country(
     country_ids: Optional[List[str]] = None,
-    months: Optional[List[str]] = None,
     metrics: Optional[List[str]] = None
 ):
-    if not country_ids:
-        results = DATA
-    else:
-        results = [entry for entry in DATA if entry.get("country_id") in country_ids]
-
-    if months:
-        results = [r for r in results if r.get("month") in months]
-
+    results = DATA
+    if country_ids:
+        results = [r for r in results if r["country_id"] in country_ids]
     if metrics:
-        for r in results:
-            keys_to_keep = ["grid_id", "month"] + metrics
-            for key in list(r.keys()):
-                if key not in keys_to_keep:
-                    r.pop(key)
-
+        results = [
+            {k: v for k, v in r.items() if k in ["grid_id", "month"] + metrics}
+            for r in results
+        ]
     return results
 
 

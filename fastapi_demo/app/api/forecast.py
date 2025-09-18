@@ -5,30 +5,34 @@ from app.data import repository
 router = APIRouter()
 
 
-# 1️⃣ /months → lista dei mesi disponibili
-@router.get("/months")
+
+@router.get("/forecast/months")
 def get_months():
     return repository.get_available_months()
 
-# 2️⃣ /cells → lista delle celle
-@router.get("/cells")
+
+@router.get("/forecast/cells")
 def get_cells():
     return repository.get_available_cells()
 
-# 3️⃣ /forecast/cell → dati per cell_id (uno o più)
+
+@router.get("/forecast/countries")
+def available_countries():
+    return get_available_countries()
+
+
 @router.get("/forecast/cell")
 def forecast_by_cell(
-     cell_id: List[int] = Query(None),
-    months: Optional[List[str]] = Query(None),
+    cell_id: List[int] = Query(None),
     metrics: Optional[List[str]] = Query(None)
 ):
-    return repository.get_forecast_by_cell(cell_id, months, metrics)
+    return repository.get_forecast_by_cell(cell_id, metrics)
 
-# 4️⃣ /forecast/country → dati per country_id
+
 @router.get("/forecast/country")
 def forecast_by_country(
     country_id: Optional[List[str]] = Query(None),
-    months: Optional[List[str]] = Query(None),
     metrics: Optional[List[str]] = Query(None)
 ):
-    return repository.get_forecast_by_country(country_id, months, metrics)
+    print("country_id ricevuto:", country_id)  # DEBUG
+    return repository.get_forecast_by_country(country_id, metrics)
