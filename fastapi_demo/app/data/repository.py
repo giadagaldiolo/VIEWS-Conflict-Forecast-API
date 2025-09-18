@@ -42,20 +42,19 @@ def get_forecast_by_cell(cell_id: int, months: Optional[List[str]] = None, metri
     return results
 
 
-def get_forecast_by_country(
-    country_id: str,
-    months: Optional[List[str]] = None,
-    metrics: Optional[List[str]] = None
-):
+def get_forecast_by_country(country_id: str, months: Optional[List[str]] = None, metrics: Optional[List[str]] = None):
     results = [entry for entry in DATA if entry["country_id"] == country_id]
+
     if months:
-        results = [r for r in results if r["month"] in months]
+        results = [r for r in results if r["month"] in months]  # ora months è lista corretta
+
     if metrics:
-        for r in results:
-            keys_to_keep = ["grid_id", "month"] + metrics
-            for key in list(r.keys()):
-                if key not in keys_to_keep:
-                    r.pop(key)
+        results = [
+            {k: v for k, v in r.items() if k in ["grid_id", "month"] + metrics}
+            for r in results
+        ]
+
     return results
+
 
 
