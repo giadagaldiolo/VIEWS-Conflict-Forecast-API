@@ -1,5 +1,6 @@
 import json
 from typing import List, Optional
+from fastapi import Query
 
 # Load data from JSON
 with open("app/data/data.json") as f:
@@ -41,7 +42,11 @@ def get_forecast_by_cell(cell_id: int, months: Optional[List[str]] = None, metri
     return results
 
 
-def get_forecast_by_country(country_id: str, months: Optional[List[str]] = None, metrics: Optional[List[str]] = None):
+def get_forecast_by_country(
+    country_id: str,
+    months: Optional[List[str]] = None,
+    metrics: Optional[List[str]] = None
+):
     results = [entry for entry in DATA if entry["country_id"] == country_id]
     if months:
         results = [r for r in results if r["month"] in months]
@@ -52,4 +57,5 @@ def get_forecast_by_country(country_id: str, months: Optional[List[str]] = None,
                 if key not in keys_to_keep:
                     r.pop(key)
     return results
+
 

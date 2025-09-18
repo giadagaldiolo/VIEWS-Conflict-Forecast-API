@@ -1,13 +1,9 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from typing import List, Optional
 from app.data import repository
 
 router = APIRouter()
 
-# Test endpoint
-@router.get("/ping")
-def ping():
-    return {"message": "pong"}
 
 # 1️⃣ /months → lista dei mesi disponibili
 @router.get("/months")
@@ -32,7 +28,7 @@ def forecast_by_cell(
 @router.get("/forecast/country")
 def forecast_by_country(
     country_id: str,
-    months: Optional[List[str]] = None,
-    metrics: Optional[List[str]] = None
+    months: Optional[List[str]] = Query(None),
+    metrics: Optional[List[str]] = Query(None)
 ):
     return repository.get_forecast_by_country(country_id, months, metrics)
