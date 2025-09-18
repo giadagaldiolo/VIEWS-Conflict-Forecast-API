@@ -57,3 +57,5 @@ Libraries:
 - scikit-learn
 ### License
 MIT License
+
+uvicorn app.main:app --reload

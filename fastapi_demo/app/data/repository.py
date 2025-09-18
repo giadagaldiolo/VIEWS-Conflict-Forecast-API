@@ -28,12 +28,14 @@ def get_available_cells() -> List[dict]:
     return cells
 
 
-def get_forecast_by_cell(cell_id: int, months: Optional[List[str]] = None, metrics: Optional[List[str]] = None):
-    results = [entry for entry in DATA if entry["grid_id"] == cell_id]
+def get_forecast_by_cell(cell_ids: Optional[List[int]] = None, months: Optional[List[str]] = None, metrics: Optional[List[str]] = None):
+    if cell_ids:
+        results = [entry for entry in DATA if entry["grid_id"] in cell_ids]
+    else:
+        results = DATA.copy()  # cell_id指定なしなら全件取得
     if months:
         results = [r for r in results if r["month"] in months]
     if metrics:
-        # keep only requested metrics + grid_id, month
         for r in results:
             keys_to_keep = ["grid_id", "month"] + metrics
             for key in list(r.keys()):
@@ -42,19 +44,28 @@ def get_forecast_by_cell(cell_id: int, months: Optional[List[str]] = None, metri
     return results
 
 
-def get_forecast_by_country(country_id: str, months: Optional[List[str]] = None, metrics: Optional[List[str]] = None):
-    results = [entry for entry in DATA if entry["country_id"] == country_id]
+def get_forecast_by_country(
+    country_ids: Optional[List[str]] = None,
+    months: Optional[List[str]] = None,
+    metrics: Optional[List[str]] = None
+):
+    if not country_ids:
+        results = DATA
+    else:
+        results = [entry for entry in DATA if entry.get("country_id") in country_ids]
 
     if months:
-        results = [r for r in results if r["month"] in months]  # ora months è lista corretta
+        results = [r for r in results if r.get("month") in months]
 
     if metrics:
-        results = [
-            {k: v for k, v in r.items() if k in ["grid_id", "month"] + metrics}
-            for r in results
-        ]
+        for r in results:
+            keys_to_keep = ["grid_id", "month"] + metrics
+            for key in list(r.keys()):
+                if key not in keys_to_keep:
+                    r.pop(key)
 
     return results
+
 
 
 
