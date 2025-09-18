@@ -8,7 +8,7 @@ with open("app/data/data.json") as f:
 
 
 def get_available_months() -> List[str]:
-    return {entry["month"] for entry in DATA}  # set ensures uniqueness
+    return {entry["month"] for entry in DATA}
 
 def get_available_countries() -> List[str]:
     return sorted({entry["country_id"] for entry in DATA})
