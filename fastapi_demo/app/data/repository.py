@@ -1,82 +1,62 @@
-import json
+# fastapi_demo/app/data/repository.py
+import pandas as pd
 from typing import List, Optional
 
-# Load data from JSON
-with open("app/data/data.json") as f:
-    DATA = json.load(f)
+PRED_PATH = "app/data/preds_001.parquet"
+HDI_PATH = "app/data/preds_001_90_hdi.parquet"
 
+# parquet 読み込み
+df_preds = pd.read_parquet(PRED_PATH)
+df_hdi = pd.read_parquet(HDI_PATH)
 
-def get_available_months() -> List[str]:
-    """Return unique months available in the dataset."""
-    return sorted({entry["month"] for entry in DATA})
+# index が同じ前提で結合
+DATA = pd.concat([df_preds, df_hdi], axis=1)
 
 
 def get_available_countries() -> List[str]:
-    """Return unique countries available in the dataset."""
-    return sorted({entry["country_id"] for entry in DATA})
+    return sorted(DATA["country_id"].unique().tolist())
 
 
 def get_available_cells() -> List[dict]:
-    """Return unique grid cells with metadata."""
-    cells = []
-    seen = set()
-    for entry in DATA:
-        grid_id = entry["grid_id"]
-        if grid_id not in seen:
-            seen.add(grid_id)
-            cells.append({
-                "grid_id": grid_id,
-                "country_id": entry["country_id"],
-                "lat": entry["lat"],
-                "lon": entry["lon"]
-            })
-    return cells
+    return DATA[["row", "col", "country_id", "lat", "lon"]].drop_duplicates().to_dict(orient="records")
+
+
+def get_available_metrics() -> List[str]:
+    return [c for c in DATA.columns if c.startswith("pred_")]
 
 
 def filter_results(
-    results: List[dict],
-    months: Optional[List[str]] = None,
+    df: pd.DataFrame,
+    months: Optional[List[str]] = None,   # parquet に month があれば利用
     metrics: Optional[List[str]] = None
-) -> List[dict]:
-    """Helper to filter by months and metrics."""
-    if months:
-        results = [r for r in results if r["month"] in months]
+):
+    # months が parquet に無い場合は無視（今のデータには month がない）
+    if months and "month" in df.columns:
+        df = df[df["month"].isin(months)]
+
     if metrics:
-        results = [
-            {k: v for k, v in r.items() if k in ["grid_id", "month"] + metrics}
-            for r in results
-        ]
-    return results
+        base_cols = ["row", "col", "country_id", "lat", "lon"]
+        df = df[base_cols + [m for m in metrics if m in df.columns]]
+
+    return df.to_dict(orient="records")
 
 
 def get_forecast_by_cell(
-    cell_ids: Optional[List[int]] = None,
-    months: Optional[List[str]] = None,
+    rows: Optional[List[int]] = None,
+    cols: Optional[List[int]] = None,
     metrics: Optional[List[str]] = None
-) -> List[dict]:
-    """Return forecast for one or more grid cells."""
-    results = DATA
-    if cell_ids:
-        results = [r for r in results if r["grid_id"] in cell_ids]
-    return filter_results(results, months, metrics)
+):
+    df = DATA
+    if rows and cols:
+        df = df[df["row"].isin(rows) & df["col"].isin(cols)]
+    return filter_results(df, metrics=metrics)
 
 
 def get_forecast_by_country(
     country_ids: Optional[List[str]] = None,
-    months: Optional[List[str]] = None,
     metrics: Optional[List[str]] = None
-) -> List[dict]:
-    """Return forecast for all grid cells in one or more countries."""
-    results = DATA
+):
+    df = DATA
     if country_ids:
-        results = [r for r in results if r["country_id"] in country_ids]
-    return filter_results(results, months, metrics)
-
-
-def get_forecast_by_month(
-    months: Optional[List[str]] = None,
-    metrics: Optional[List[str]] = None
-) -> List[dict]:
-    """Return forecast filtered by month(s) only."""
-    results = DATA
-    return filter_results(results, months, metrics)
+        df = df[df["country_id"].isin(country_ids)]
+    return filter_results(df, metrics=metrics)

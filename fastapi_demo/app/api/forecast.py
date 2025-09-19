@@ -56,3 +56,7 @@ def forecast_by_month(
 ):
     return repository.get_forecast_by_month(months, metrics)
 
+@router.get("/metrics", summary="Available Metrics", tags=["Info"])
+def get_metrics():
+    """Returns all available metric keys (pred_* columns)."""
+    return repository.get_available_metrics()
