@@ -2,3 +2,6 @@
 __pycache__
 preds_001_90_hdi.parquet
 preds_001.parquet
+fatalities002_2025_07_t01_pgm.csv
+fatalities002_2025_07_t01_cm.csv
+.pytest_cache

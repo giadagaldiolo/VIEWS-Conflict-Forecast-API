@@ -37,17 +37,16 @@ def forecast_by_cell(
     return repository.get_forecast_by_cell(cell_id, months, metrics)
 
 
-@router.get("/country", summary="Forecast By Country", tags=["Forecast"])
-def forecast_by_country(
-    country_id: List[str] = Query(..., description="IDs of countries to filter, one or more"),
-    months: Optional[List[str]] = Query(None, description="Months to filter"),
-    metrics: Optional[List[str]] = Query(None, description="Metrics to include")
+@router.get("/country")
+def get_forecast_by_country(
+    country_ids: List[int] = Query(..., description="List of country IDs"),
+    metrics: List[str] = Query(..., description="List of metric names")
 ):
-    """
-    Returns forecast values for all grid cells in one or more countries.
-    """
-    return repository.get_forecast_by_country(country_id, months, metrics)
-
+    return {
+        "country_ids": country_ids,
+        "metrics": metrics,
+        "forecast": "Dummy forecast data here"
+    }
 
 @router.get("/month", summary="Forecast By Month", tags=["Forecast"])
 def forecast_by_month(
