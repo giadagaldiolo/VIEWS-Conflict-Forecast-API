@@ -21,19 +21,15 @@ def iter_forecasts_json(
     metrics: Optional[List[str]] = None,
 ):
     """
-    Streaming generator che restituisce JSON line by line.
+    Streaming generator that returns JSON line by line.
     """
-    try:
-        for record in reader.query(
-            month_ids=month_ids,
-            priogrid_ids=priogrid_ids,
-            country_ids=country_ids,
-            metrics=metrics
-        ):
-            yield json.dumps(record) + "\n"
-
-    except Exception as e:
-        yield json.dumps({"error": str(e)}) + "\n"
+    for record in reader.query(
+        month_ids=month_ids,
+        priogrid_ids=priogrid_ids,
+        country_ids=country_ids,
+        metrics=metrics
+    ):
+        yield json.dumps(record) + "\n"
 
 @router.get("/forecast")
 async def get_forecast():
@@ -64,7 +60,7 @@ def get_forecasts(
             country_ids=country_id,
             metrics=metrics
         ),
-        media_type="application/json"
+        media_type="application/x-ndjson"
     )
 
 

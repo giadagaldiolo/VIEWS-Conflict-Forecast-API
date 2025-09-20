@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from fastapi_demo.backend.main import app
+from main import app
 
 client = TestClient(app)
 
@@ -29,11 +29,14 @@ ALL_METRICS = [
 ]
 
 def parse_response(response):
-    """NDJSON と通常 JSON の両対応"""
-    try:
+    content_type = response.headers.get("content-type", "")
+    if content_type.startswith("application/x-ndjson"):
+        # NDJSONなら各行をJSONとしてパースしてリスト返却
         return [json.loads(line) for line in response.text.splitlines()]
-    except json.JSONDecodeError:
+    else:
+        # 通常のJSONならそのまま返す
         return response.json()
+
 
 @pytest.mark.parametrize("endpoint", [
     "/api/preds_001/pgm/sb/months",
@@ -135,4 +138,29 @@ def test_empty_response_all_metrics():
     data = parse_response(response)
     assert data == []
 
+def test_forecasts_no_metrics_returns_meta_only():
+    params = {"month_id": 409, "priogrid_id": [62356]}
+    response = client.get("/api/preds_001/pgm/sb/forecasts", params=params)
+    assert response.status_code == 200
+    data = parse_response(response)
+    assert len(data) == 1
+    cell = data[0]
+    # メタ情報だけ返る
+    for key in ["priogrid_id", "lat", "lon", "country_id", "month_id", "row", "col"]:
+        assert key in cell
+    # メトリックはなし
+    assert all(k not in cell for k in ["pred_ln_sb_best", "pred_ln_ns_best"])
 
+def test_forecasts_invalid_metric():
+    params = {"month_id": 409, "priogrid_id": [62356], "metrics": ["foobar"]}
+    response = client.get("/api/preds_001/pgm/sb/forecasts", params=params)
+    assert response.status_code == 400
+    data = parse_response(response)
+    assert "Invalid metrics" in data["detail"]
+
+def test_forecasts_nonexistent_ids():
+    params = {"month_id": 9999, "priogrid_id": [0], "country_id": 0}
+    response = client.get("/api/preds_001/pgm/sb/forecasts", params=params)
+    assert response.status_code == 200
+    data = parse_response(response)
+    assert data == []
