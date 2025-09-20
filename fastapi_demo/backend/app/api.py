@@ -4,6 +4,8 @@ from typing import List, Optional
 from .storage_reader import ParquetFlatReader
 from .schemas import FORECAST_SCHEMA
 import json
+from fastapi.responses import JSONResponse
+from fastapi import Request
 
 router = APIRouter()
 
@@ -21,15 +23,19 @@ def iter_forecasts_json(
     metrics: Optional[List[str]] = None,
 ):
     """
-    Streaming generator that returns JSON line by line.
+    Streaming generator che restituisce JSON line by line.
     """
-    for record in reader.query(
-        month_ids=month_ids,
-        priogrid_ids=priogrid_ids,
-        country_ids=country_ids,
-        metrics=metrics
-    ):
-        yield json.dumps(record) + "\n"
+    try:
+        for record in reader.query(
+            month_ids=month_ids,
+            priogrid_ids=priogrid_ids,
+            country_ids=country_ids,
+            metrics=metrics
+        ):
+            yield json.dumps(record) + "\n"
+
+    except Exception as e:
+        yield json.dumps({"error": str(e)}) + "\n"
 
 @router.get("/forecast")
 async def get_forecast():
@@ -60,7 +66,7 @@ def get_forecasts(
             country_ids=country_id,
             metrics=metrics
         ),
-        media_type="application/x-ndjson"
+        media_type="application/json"
     )
 
 
@@ -155,3 +161,10 @@ def get_metrics():
         return metrics
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail}
+    )

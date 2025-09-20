@@ -1,9 +1,11 @@
+// App.tsx
 import React, { useState } from "react";
 import { ForecastQuery } from "./components/ForecastQuery";
 import { ForecastViewer } from "./components/ForecastViewer";
+import { ForecastData } from "./components/types";
 
 export function App() {
-  const [forecastData, setForecastData] = useState<any[] | null>(null);
+  const [forecastData, setForecastData] = useState<ForecastData[] | null>(null);
 
   return (
     <div>
