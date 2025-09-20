@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="771760b4-0b27-4add-af3e-f473ec90b863" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/fastapi_demo/backend/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/fastapi_demo/backend/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastapi_demo/frontend/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/fastapi_demo/frontend/src/App.tsx" afterDir="false" />
+    <list default="true" id="771760b4-0b27-4add-af3e-f473ec90b863" name="Changes" comment="fixed problems">
       <change beforePath="$PROJECT_DIR$/fastapi_demo/frontend/src/view/ForecastQueryView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/fastapi_demo/frontend/src/view/ForecastQueryView.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -63,11 +61,24 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1758392366023</updated>
-      <workItem from="1758392367930" duration="4843000" />
+      <workItem from="1758392367930" duration="5039000" />
     </task>
+    <task id="LOCAL-00001" summary="fixed problems">
+      <option name="closed" value="true" />
+      <created>1758397323919</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1758397323919</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="fixed problems" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed problems" />
   </component>
 </project>

@@ -56,7 +56,7 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const segments = ["api", run, loa, typeOfViolence, "forecasts"];
+            const segments = [ run, loa, typeOfViolence, "forecasts"];
             const params = new URLSearchParams();
             if (monthId) params.append("month_id", monthId);
             if (countryId) params.append("country_id", countryId);
