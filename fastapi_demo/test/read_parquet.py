@@ -1,5 +1,4 @@
 import pyarrow.parquet as pq
-import pandas as pd
 
 print("-----------------preds_001.parquet-----------------")
 schema_001 = pq.read_schema('preds_001.parquet')

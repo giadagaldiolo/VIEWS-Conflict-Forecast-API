@@ -6,3 +6,4 @@ fatalities002_2025_07_t01_pgm.csv
 fatalities002_2025_07_t01_cm.csv
 .pytest_cache
 __init__.py
+.ruff_cache
