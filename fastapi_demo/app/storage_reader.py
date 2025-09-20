@@ -47,6 +47,7 @@ class ParquetFlatReader:
         """
         Generator che restituisce record filtrati, con eventuale subset di metriche.
         Streaming riga per riga per performance.
+        Calcola MAP come media delle tre liste di previsioni.
         """
         df = self.df
 
@@ -58,15 +59,41 @@ class ParquetFlatReader:
         if country_ids:
             df = df.filter(pl.col("country_id").is_in(country_ids))
 
-        # Se metrics specificate, seleziona solo quelle
-        if metrics:
-            # Seleziona solo le metriche richieste che esistono in METRIC_COLS
-            metric_cols = [c for c in metrics if c in self.METRIC_COLS]
-        else:
-            metric_cols = self.METRIC_COLS
+        # Determina metriche da restituire
+        metric_cols = metrics if metrics else self.METRIC_COLS
+        metric_cols = [c for c in metric_cols if c in self.METRIC_COLS]
 
         # Streaming riga per riga
         for row in df.iter_rows(named=True):
+            # Calcola MAP come media di pred_ln_*_best
+            pred_lists = []
+            for key in ["pred_ln_sb_best", "pred_ln_ns_best", "pred_ln_os_best"]:
+                lst = row.get(key)
+                if lst:
+                    pred_lists.extend(lst)
+            MAP = float(sum(pred_lists) / len(pred_lists)) if pred_lists else None
+
+            # Costruzione dizionario valori
+            values_dict = {
+                "MAP": MAP,
+                "HDI_50_lower": row.get("pred_ln_sb_best_hdi_lower"),
+                "HDI_50_upper": row.get("pred_ln_sb_best_hdi_upper"),
+                "HDI_90_lower": row.get("pred_ln_ns_best_hdi_lower"),
+                "HDI_90_upper": row.get("pred_ln_ns_best_hdi_upper"),
+                "HDI_99_lower": row.get("pred_ln_os_best_hdi_lower"),
+                "HDI_99_upper": row.get("pred_ln_os_best_hdi_upper"),
+                "prob_threshold_1": row.get("pred_ln_sb_prob_hdi_lower"),
+                "prob_threshold_2": row.get("pred_ln_sb_prob_hdi_upper"),
+                "prob_threshold_3": row.get("pred_ln_ns_prob_hdi_lower"),
+                "prob_threshold_4": row.get("pred_ln_ns_prob_hdi_upper"),
+                "prob_threshold_5": row.get("pred_ln_os_prob_hdi_lower"),
+                "prob_threshold_6": row.get("pred_ln_os_prob_hdi_upper"),
+            }
+
+            # Filtra solo metriche richieste
+            values_dict = {k: v for k, v in values_dict.items() if k in metric_cols}
+
+            # Costruisci record finale
             cell_record = {
                 "priogrid_id": row["priogrid_id"],
                 "lat": row.get("lat"),
@@ -75,9 +102,11 @@ class ParquetFlatReader:
                 "month_id": row["month_id"],
                 "row": row.get("row"),
                 "col": row.get("col"),
-                "values": {c: row.get(c) for c in self.METRIC_COLS}
+                "values": values_dict
             }
+
             yield cell_record
+
 
     def list_months(self) -> List[int]:
         return sorted(self.df.select("month_id").unique().to_series().to_list())
