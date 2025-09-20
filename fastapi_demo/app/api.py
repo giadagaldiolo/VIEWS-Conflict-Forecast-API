@@ -2,17 +2,13 @@ from fastapi import APIRouter, Query, Path, HTTPException
 from fastapi.responses import StreamingResponse
 from typing import List, Optional
 from .storage_reader import ParquetFlatReader
-from .schemas import FORECAST_SCHEMA
+from .schemas import ForecastCell, ForecastValues
 import json
 
 router = APIRouter()
 
 # Inizializza reader
 reader = ParquetFlatReader(base_path="app/data")
-
-BASE_COLS = ["priogrid_id", "month_id", "country_id", "lat", "lon", "row", "col"]
-FORECAST_COLS = [c for c in FORECAST_SCHEMA.keys() if c not in BASE_COLS]
-
 
 def iter_forecasts_json(
     month_ids: Optional[List[int]] = None,
@@ -39,7 +35,8 @@ def iter_forecasts_json(
 # ---------------------------
 # Forecasts endpoint
 # ---------------------------
-@router.get("/{run}/{loa}/{type_of_violence}/forecasts")
+
+@router.get("/{run}/{loa}/{type_of_violence}/forecasts", response_model=List[ForecastCell])
 def get_forecasts(
     run: str = Path(...),
     loa: str = Path(...),
@@ -47,22 +44,37 @@ def get_forecasts(
     month_id: Optional[List[int]] = Query(None),
     priogrid_id: Optional[List[int]] = Query(None),
     country_id: Optional[List[int]] = Query(None),
-    metrics: Optional[List[str]] = Query(None)
+    metrics: Optional[List[str]] = Query(None),
 ):
-    if metrics:
-        invalid = [m for m in metrics if m not in FORECAST_COLS]
-        if invalid:
-            raise HTTPException(status_code=400, detail=f"Invalid metrics: {invalid}")
+    results = []
 
-    return StreamingResponse(
-        iter_forecasts_json(
+    try:
+        for record in reader.query(
             month_ids=month_id,
             priogrid_ids=priogrid_id,
             country_ids=country_id,
             metrics=metrics
-        ),
-        media_type="application/json"
-    )
+        ):
+            values_dict = record["values"]
+
+
+            values_dict = {k: v for k, v in record["values"].items() if not metrics or k in metrics}
+            values = ForecastValues(**values_dict)
+
+
+            results.append(ForecastCell(
+                priogrid_id=record["priogrid_id"],
+                month_id=record["month_id"],
+                country_id=record.get("country_id"),
+                lat=record.get("lat"),
+                lon=record.get("lon"),
+                values=values
+            ))
+
+        return results
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ---------------------------
@@ -74,7 +86,6 @@ def list_months(run: str, loa: str, type_of_violence: str):
         return reader.list_months()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 # ---------------------------
 # Grid cells endpoint
@@ -95,7 +106,6 @@ def list_countries(
     loa: str = Path(...),
     type_of_violence: str = Path(...)
 ):
-    """Return all available country IDs"""
     try:
         return reader.list_country_ids()
     except Exception as e:
