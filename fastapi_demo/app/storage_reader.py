@@ -70,12 +70,28 @@ class ParquetFlatReader(StorageReader):
 
         # Se metrics specificate, seleziona solo quelle
         if metrics:
-            cols = [c for c in metrics if c in df.columns]
-            df = df.select(cols)
+            # Non sovrascrivere df: selezioniamo le colonne metriche solo dopo
+            metric_cols = [c for c in metrics if c in df.columns]
 
         # Streaming riga per riga
         for row in df.iter_rows(named=True):
-            yield row
+            cell_record = {
+                # METADATI della cella sempre inclusi
+                "priogrid_id": row["priogrid_id"],
+                "lat": row["lat"],
+                "lon": row["lon"],
+                "country_id": row["country_id"],
+                "month_id": row["month_id"],
+                "row": row["row"],
+                "col": row["col"],
+            }
+
+            # Aggiungi solo le metriche richieste
+            if metrics:
+                for c in metric_cols:
+                    cell_record[c] = row[c]
+
+            yield cell_record
 
     def list_months(self) -> List[int]:
         return sorted(self.df.select("month_id").unique().to_series().to_list())

@@ -1,4 +1,3 @@
-# router.py
 from fastapi import APIRouter, Query, Path, HTTPException
 from fastapi.responses import StreamingResponse
 from typing import List, Optional
