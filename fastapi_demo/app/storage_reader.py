@@ -77,3 +77,8 @@ class ParquetFlatReader(StorageReader):
         lf = self._scan()
         cells = lf.select("priogrid_id").unique().collect().to_series().to_list()
         return sorted(cells)
+    
+    def list_months(self) -> List[int]:
+        lf = pl.scan_parquet(self.main_file).select("month_id").unique()
+        months = lf.collect().to_series().to_list()
+        return sorted(months)
