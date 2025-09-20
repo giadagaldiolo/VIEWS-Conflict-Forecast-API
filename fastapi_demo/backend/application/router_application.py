@@ -1,15 +1,19 @@
 from fastapi import APIRouter, Query, Path, HTTPException
 from typing import List, Optional
-from backend.business.cell.interface_cell_service import ICellService
-from backend.business.cell.interface_country_service import ICountryService
-from backend.business.cell.interface_month_service import IMonthService
-from backend.business.cell.interface_query_service import IForecastQueryService
-from backend.application.schemas import ForecastCell, ForecastValues
+from business.cell.cell_service import CellService
+from business.country.countries_service import CountryService
+from business.month.month_service import MonthService
+from business.query.forecast_query_service import ForecastQueryService
+from dataAccess.parquet_reader import ParquetFlatReader
+from application.schemas import ForecastCell, ForecastValues
 
 router = APIRouter()
 
-# Singleton service
-service = ForecastService(repository)
+reader = ParquetFlatReader(base_path="dataAccess")
+cell_service = CellService(reader)
+month_service = MonthService(reader)
+country_service = CountryService(reader)
+forecast_service = ForecastQueryService(reader)
 
 @router.get("/{run}/{loa}/{type_of_violence}/forecasts", response_model=List[ForecastCell])
 def get_forecasts(
@@ -22,7 +26,7 @@ def get_forecasts(
     metrics: Optional[List[str]] = Query(None),
 ):
     try:
-        results = IForecastQueryService.get_forecasts(month_id, priogrid_id, country_id, metrics)
+        results = forecast_service.get_forecasts(month_id, priogrid_id, country_id, metrics)
         # Converti valori in ForecastCell / ForecastValues
         converted = [
             ForecastCell(
@@ -41,20 +45,25 @@ def get_forecasts(
 @router.get("/{run}/{loa}/{type_of_violence}/months", response_model=List[int])
 def list_months(run: str, loa: str, type_of_violence: str):
     try:
-        return IMonthService.get_months()
+        return month_service.get_months()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{run}/{loa}/{type_of_violence}/cells", response_model=List[int])
 def list_cells(run: str, loa: str, type_of_violence: str):
     try:
-        return ICellService.get_cells()
+        return cell_service.get_cells()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{run}/{loa}/{type_of_violence}/countries", response_model=List[int])
 def list_countries(run: str, loa: str, type_of_violence: str):
     try:
-        return ICountryService.get_countries()
+        return country_service.get_countries()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/")
+def root():
+    return {"message": "API is running. Use /{run}/{loa}/{type_of_violence}/... endpoints."}

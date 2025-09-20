@@ -1,9 +1,9 @@
 from typing import List, Dict, Any, Optional
-from backend.dataAccess.interface_parquet_reader import IParquetReader
-from forecast_query_service import IForecastQueryService
+from dataAccess.interface_parquet_reader import IParquetReader
+from business.query.interface_query_service import IForecastQueryService
 
 class ForecastQueryService(IForecastQueryService):
-    def __init__(self, repository: IForecastRepository):
+    def __init__(self, repository: IParquetReader):
         self.repository = repository
 
     def get_forecasts(

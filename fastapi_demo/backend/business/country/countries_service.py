@@ -1,9 +1,9 @@
 from typing import List
-from backend.dataAccess.interface_parquet_reader import IParquetReader
-from forecast_country_service import ICountryService
+from dataAccess.interface_parquet_reader import IParquetReader
+from business.country.interface_country_service import ICountryService
 
 class CountryService(ICountryService):
-    def __init__(self, repository: IForecastRepository):
+    def __init__(self, repository: IParquetReader):
         self.repository = repository
 
     def get_countries(self) -> List[int]:

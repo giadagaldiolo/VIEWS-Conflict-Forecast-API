@@ -1,15 +1,20 @@
 # Base image
 FROM python:3.11-slim
 
-# Working directory
+# Set working directory
 WORKDIR /app
 
-# Copy and install dependencies
+# Copy dependencies first for caching
 COPY requirements.txt .
+
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the entire project
+# Copy project code
 COPY . .
 
-# Default command
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Expose port
+EXPOSE 8000
+
+# Run app with reload in dev
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

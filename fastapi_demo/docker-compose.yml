@@ -1,10 +1,22 @@
-version: '3'
 services:
   backend:
     build: ./backend
+    image: fastapi_demo-backend
+    container_name: fastapi_demo-backend
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+
   frontend:
     build: ./frontend
+    image: fastapi_demo-frontend
+    container_name: fastapi_demo-frontend
     ports:
       - "5173:5173"
+    volumes:
+      - ./frontend:/app
+    environment:
+      - CHOKIDAR_USEPOLLING=true

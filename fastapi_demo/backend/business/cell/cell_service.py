@@ -1,9 +1,9 @@
 from typing import List
-from backend.dataAccess.interface_parquet_reader import IParquetReader
-from forecast_cell_service import ICellService
+from dataAccess.interface_parquet_reader import IParquetReader
+from business.cell.interface_cell_service import ICellService
 
 class CellService(ICellService):
-    def __init__(self, repository: IForecastRepository):
+    def __init__(self, repository: IParquetReader):
         self.repository = repository
 
     def get_cells(self) -> List[int]:

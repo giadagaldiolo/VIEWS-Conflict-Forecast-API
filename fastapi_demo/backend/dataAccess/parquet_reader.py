@@ -1,7 +1,7 @@
 from pathlib import Path
 import polars as pl
 from typing import List, Optional, Dict, Any, Iterator
-from interface_parquet_reader import IParquetReader
+from dataAccess.interface_parquet_reader import IParquetReader
 
 class ParquetFlatReader(IParquetReader):
     """

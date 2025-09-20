@@ -1,9 +1,9 @@
 from typing import List
-from backend.dataAccess.interface_parquet_reader import IParquetReader
-from forecast_month_service import IMonthService
+from dataAccess.interface_parquet_reader import IParquetReader
+from business.month.interface_month_service import IMonthService
 
 class MonthService(IMonthService):
-    def __init__(self, repository: IForecastRepository):
+    def __init__(self, repository: IParquetReader):
         self.repository = repository
 
     def get_months(self) -> List[int]:
