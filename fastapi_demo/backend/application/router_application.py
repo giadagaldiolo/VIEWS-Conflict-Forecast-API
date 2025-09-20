@@ -63,6 +63,19 @@ def list_countries(run: str, loa: str, type_of_violence: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/{run}/{loa}/{type_of_violence}/metrics", response_model=List[str])
+def list_metrics(run: str, loa: str, type_of_violence: str):
+    """
+    Restituisce l'elenco dei nomi delle metriche disponibili in ForecastValues.
+    """
+    try:
+        # Prendi tutti i campi di ForecastValues come lista di stringhe
+        from application.schemas import ForecastValues
+        metrics = list(ForecastValues.__fields__.keys())
+        return metrics
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/")
 def root():

@@ -24,27 +24,30 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
     const [months, setMonths] = useState<number[]>([]);
     const [countries, setCountries] = useState<number[]>([]);
     const [cells, setCells] = useState<number[]>([]);
+    const [availableMetrics, setAvailableMetrics] = useState<string[]>([]);
 
-    // URL backend corretto per Docker
     const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
 
-    // Carica months, countries, cells all'avvio
+    // Carica months, countries, cells e metrics all'avvio
     useEffect(() => {
         const fetchLists = async () => {
             try {
-                const [monthsRes, countriesRes, cellsRes] = await Promise.all([
+                const [monthsRes, countriesRes, cellsRes, metricsRes] = await Promise.all([
                     fetch(`${BASE_URL}/${run}/${loa}/${typeOfViolence}/months`),
                     fetch(`${BASE_URL}/${run}/${loa}/${typeOfViolence}/countries`),
                     fetch(`${BASE_URL}/${run}/${loa}/${typeOfViolence}/cells`),
+                    fetch(`${BASE_URL}/${run}/${loa}/${typeOfViolence}/metrics`)
                 ]);
 
                 const monthsData = await monthsRes.json();
                 const countriesData = await countriesRes.json();
                 const cellsData = await cellsRes.json();
+                const metricsData = await metricsRes.json();
 
                 setMonths(monthsData);
                 setCountries(countriesData);
                 setCells(cellsData);
+                setAvailableMetrics(metricsData);
             } catch (e: any) {
                 setError(e.message);
             }
@@ -56,7 +59,7 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const segments = [ run, loa, typeOfViolence, "forecasts"];
+            const segments = [run, loa, typeOfViolence, "forecasts"];
             const params = new URLSearchParams();
             if (monthId) params.append("month_id", monthId);
             if (countryId) params.append("country_id", countryId);
@@ -100,9 +103,7 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
                     Month:
                     <select value={monthId} onChange={e => setMonthId(e.target.value)}>
                         <option value="">-- select month --</option>
-                        {months.map(m => (
-                            <option key={m} value={m}>{m}</option>
-                        ))}
+                        {months.map(m => <option key={m} value={m}>{m}</option>)}
                     </select>
                 </label>
 
@@ -110,9 +111,7 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
                     Country:
                     <select value={countryId} onChange={e => setCountryId(e.target.value)}>
                         <option value="">-- select country --</option>
-                        {countries.map(c => (
-                            <option key={c} value={c}>{c}</option>
-                        ))}
+                        {countries.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                 </label>
 
@@ -120,14 +119,22 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
                     Priogrid:
                     <select value={priogridId} onChange={e => setPriogridId(e.target.value)}>
                         <option value="">-- select cell --</option>
-                        {cells.map(c => (
-                            <option key={c} value={c}>{c}</option>
-                        ))}
+                        {cells.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                 </label>
 
                 <label>
-                    Metrics: <input value={metrics} onChange={e => setMetrics(e.target.value)} placeholder="MAP,MAE,..." />
+                    Metrics:
+                    <select
+                        multiple
+                        value={metrics.split(",").filter(Boolean)}
+                        onChange={e => {
+                            const selected = Array.from(e.target.selectedOptions).map(o => o.value);
+                            setMetrics(selected.join(","));
+                        }}
+                    >
+                        {availableMetrics.map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
                 </label>
             </div>
 
