@@ -1,10 +1,9 @@
-# storage_reader.py
 from pathlib import Path
 import polars as pl
-from typing import Iterator, Dict, Any, Optional, List
-from .schemas import ForecastValues
+from typing import List, Optional, Dict, Any, Iterator
+from interface_parquet_reader import IParquetReader
 
-class ParquetFlatReader:
+class ParquetFlatReader(IParquetReader):
     """
     Lettura ottimizzata di parquet forecasts:
     - Join dei file main + HDI all'avvio.
@@ -27,17 +26,10 @@ class ParquetFlatReader:
 
     def __init__(self, base_path: str):
         self.base_path = Path(base_path)
-
-        # File parquet
-        main_file = self.base_path / "preds_001.parquet"
-        hdi_file = self.base_path / "preds_001_90_hdi.parquet"
-
-        # Carica e fai join dei file all'avvio
-        df_main = pl.read_parquet(main_file)
-        df_hdi = pl.read_parquet(hdi_file)
-
-
+        df_main = pl.read_parquet(self.base_path / "preds_001.parquet")
+        df_hdi = pl.read_parquet(self.base_path / "preds_001_90_hdi.parquet")
         self.df = df_main.join(df_hdi, on=["month_id", "priogrid_id"], how="left")
+
 
     def query(
         self,
