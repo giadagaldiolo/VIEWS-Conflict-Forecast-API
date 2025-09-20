@@ -1,61 +1,70 @@
-# JunctionHack Project Overview
+# VIEWS Conflict Forecast API - MVP
 
-This repository contains three sample projects:
+This is the MVP version of the VIEWS conflict forecasting API.  
+It exposes 36 months of global raster forecasts (0.5° grid) via FastAPI.
 
-1. **Face Detection + Emotion Recognition Demo (using face-api.js)**  
-   A simple browser demo that performs real-time face detection and emotion recognition.
+## Quick Start
 
-2. **Simple Web API Server with FastAPI**  
-   Provides a root endpoint and a dummy weather forecast API.
-
-3. **Anomaly Detection Sample (using IsolationForest)**  
-   A Python script to detect anomalies from CSV data.
-
----
-
-# How to Use
-
-## 1. Face Detection + Emotion Recognition Demo
-
-- Place `index.html`, `style.css`, and `script.js` in the same folder.
-- Open `index.html` in a browser to see real-time face detection and emotion recognition using your camera.
-- Required libraries are loaded via CDN.
-
----
-
-## 2. FastAPI Web API
-
-### How to Run
-
+### 1. Clone the repository
 ```bash
-uvicorn main:app --reload
+git clone <repo-url>
+cd JunctionHack/fastapi_demo
 ```
-FastAPI code is in main.py.
-
-### Endpoints
-- /
-<br>Returns a "Hello World" message.
-
-- /api/forecast/{grid_id}
-<br>Returns a dummy weather forecast (e.g., "Sunny") for the specified grid_id.
-
-## 3. Anomaly Detection Script
-Prepare a CSV file named sample_data.csv containing numerical columns.
-
-Save the Python script as anomaly_detection.py and run:
+### 2. Build Docker image
 ```bash
-python data_quality.py
+docker build -t views-mvp .
 ```
-It checks for missing values and prints anomalies detected by IsolationForest.
+### 3. Run the API
+```bash
+docker run -p 8000:8000 views-mvp
+```
+The API will be available at http://localhost:8000.
+### 4. Run tests
+```bash
+make test
+```
+### 5. Lint and type checks
+```bash
+make lint
+mypy app/main.py
+```
+## API Endpoints
+/forecasts
 
-### Requirements
-Python 3.7 or higher
-Libraries:
-- fastapi
-- uvicorn
-- pandas
-- scikit-learn
-### License
-MIT License
+Query forecasts by grid cell, month, or country.
 
-uvicorn app.main:app --reload
+### Parameters:
+priogrid_id: single ID or list of IDs
+month_id: single month or range
+country_id: optional
+metrics: list of metrics to return (MAP, HDIs, threshold probabilities)
+### Example Request:
+```bash
+curl "http://localhost:8000/forecasts?priogrid_id=12345&month_id=1&metrics=MAP,pred_ln_sb_best"
+```
+### Response:
+```bash
+[
+  {
+    "priogrid_id": 12345,
+    "lat": 12.34,
+    "lon": 56.78,
+    "country_id": 840,
+    "MAP": 0.123,
+    "pred_ln_sb_best": [0.1, 0.2, 0.3],
+    ...
+  }
+]
+```
+## Makefile Commands
+```bash
+make run       # Run API locally
+make test      # Run pytest
+make lint      # Run ruff
+make format    # Run black formatter
+make clean     # Clean caches
+```
+## Notes
+- Admin-1 / Admin-2 IDs are not yet implemented.
+- NDJSON / streaming responses for large datasets are planned for next iteration.
+- All forecasts are synthetic test data for MVP purposes.
