@@ -111,3 +111,51 @@ def list_countries(
 @router.get("/ping")
 def ping():
     return {"status": "ok"}
+
+# ---------------------------
+# Countries endpoint
+# ---------------------------
+@router.get("/countries", response_model=List[dict])
+def get_countries():
+    """
+    Return list of available countries with ID and name.
+    """
+    try:
+        # reader から country_id を取得し、仮に name を ID の文字列に設定
+        country_ids = reader.list_country_ids()
+        countries = [{"id": cid, "name": str(cid)} for cid in country_ids]
+        return countries
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ---------------------------
+# Months endpoint
+# ---------------------------
+@router.get("/months", response_model=List[dict])
+def get_months():
+    """
+    Return list of months with ID and label.
+    """
+    try:
+        month_ids = reader.list_months()
+        months = [{"id": mid, "label": str(mid)} for mid in month_ids]
+        return months
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ---------------------------
+# Metrics endpoint（オプション）
+# ---------------------------
+@router.get("/metrics", response_model=List[str])
+def get_metrics():
+    """
+    Return list of available metrics.
+    """
+    try:
+        # 既存の FORECAST_COLS をそのまま返す
+        from .schemas import FORECAST_SCHEMA
+        BASE_COLS = ["priogrid_id", "month_id", "country_id", "lat", "lon", "row", "col"]
+        metrics = [c for c in FORECAST_SCHEMA.keys() if c not in BASE_COLS]
+        return metrics
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
