@@ -14,6 +14,7 @@ class ParquetFlatReader:
 
     BASE_COLS = ["priogrid_id", "month_id", "country_id", "lat", "lon", "row", "col"]
 
+
     # Colonne previste nei valori
     METRIC_COLS = [
         "MAP",
@@ -34,6 +35,7 @@ class ParquetFlatReader:
         # Carica e fai join dei file all'avvio
         df_main = pl.read_parquet(main_file)
         df_hdi = pl.read_parquet(hdi_file)
+
 
         self.df = df_main.join(df_hdi, on=["month_id", "priogrid_id"], how="left")
 
