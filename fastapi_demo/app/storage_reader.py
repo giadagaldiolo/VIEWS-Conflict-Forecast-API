@@ -86,4 +86,3 @@ class ParquetFlatReader(StorageReader):
     def list_country_ids(self) -> List[int]:
         """Return all unique country IDs in the dataset"""
         return sorted(self.df.select("country_id").unique().to_series().to_list())
-
