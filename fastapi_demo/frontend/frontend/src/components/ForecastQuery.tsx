@@ -1,14 +1,17 @@
 import React, { useState } from "react";
 
-export function ForecastQuery() {
+interface ForecastQueryProps {
+  onData: (data: any[] | null) => void;
+}
+
+export function ForecastQuery({ onData }: ForecastQueryProps) {
   const [run, setRun] = useState("v1");
   const [loa, setLoa] = useState("standard");
   const [typeOfViolence, setTypeOfViolence] = useState("armed_conflict");
   const [monthId, setMonthId] = useState("1");
   const [countryId, setCountryId] = useState("840");
   const [metrics, setMetrics] = useState("MAP");
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = async () => {
     const url = `http://localhost:8000/api/${run}/${loa}/${typeOfViolence}/forecasts?month_id=${monthId}&country_id=${countryId}&metrics=${metrics}`;
@@ -17,12 +20,16 @@ export function ForecastQuery() {
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
-      const data = await res.json();
-      setResult(data);
+      const text = await res.text();
+      // StreamingResponseで複数JSONが改行で区切られている前提
+      const lines = text.trim().split("\n");
+      const data = lines.map(line => JSON.parse(line));
+
+      onData(data);
       setError(null);
-    } catch (e) {
+    } catch (e: any) {
       setError(e.message);
-      setResult(null);
+      onData(null);
     }
   };
 
@@ -49,8 +56,7 @@ export function ForecastQuery() {
       </div>
       <button onClick={fetchData}>Fetch Forecast</button>
 
-      {error && <div style={{color:"red"}}>Error: {error}</div>}
-      {result && <pre>{JSON.stringify(result, null, 2)}</pre>}
+      {error && <div style={{ color: "red" }}>Error: {error}</div>}
     </div>
   );
 }
