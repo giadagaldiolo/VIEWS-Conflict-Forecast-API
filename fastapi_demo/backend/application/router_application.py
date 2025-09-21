@@ -15,7 +15,8 @@ month_service = MonthService(reader)
 country_service = CountryService(reader)
 forecast_service = ForecastQueryService(reader)
 
-@router.get("/{run}/{loa}/{type_of_violence}/forecasts", response_model=List[ForecastCell])
+
+@router.get("/{run}/{loa}/{type_of_violence}/forecasts")
 def get_forecasts(
     run: str = Path(...),
     loa: str = Path(...),
@@ -27,20 +28,30 @@ def get_forecasts(
 ):
     try:
         results = forecast_service.get_forecasts(month_id, priogrid_id, country_id, metrics)
-        # Converti valori in ForecastCell / ForecastValues
-        converted = [
-            ForecastCell(
-                priogrid_id=r["priogrid_id"],
-                month_id=r["month_id"],
-                country_id=r.get("country_id"),
-                lat=r.get("lat"),
-                lon=r.get("lon"),
-                values=ForecastValues(**r["values"])
-            ) for r in results
-        ]
+        converted = []
+
+        for r in results:
+            # Se ci sono metriche selezionate, restituisci solo quelle
+            if metrics:
+                values_dict = {k: v for k, v in r["values"].items() if k in metrics}
+            else:
+                values_dict = r["values"]
+
+            cell = {
+                "priogrid_id": r["priogrid_id"],
+                "month_id": r["month_id"],
+                "country_id": r.get("country_id"),
+                "lat": r.get("lat"),
+                "lon": r.get("lon"),
+                "values": values_dict  # restituisce solo le metriche richieste
+            }
+            converted.append(cell)
+
         return converted
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/{run}/{loa}/{type_of_violence}/months", response_model=List[int])
 def list_months(run: str, loa: str, type_of_violence: str):

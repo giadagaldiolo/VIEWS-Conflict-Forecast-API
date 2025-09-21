@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="771760b4-0b27-4add-af3e-f473ec90b863" name="Changes" comment="fixed graphics">
-      <change afterPath="$PROJECT_DIR$/fastapi_demo/frontend/src/view/ForecastQueryView.css" afterDir="false" />
+    <list default="true" id="771760b4-0b27-4add-af3e-f473ec90b863" name="Changes" comment="fixed warnings">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fastapi_demo/backend/application/router_application.py" beforeDir="false" afterPath="$PROJECT_DIR$/fastapi_demo/backend/application/router_application.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fastapi_demo/frontend/src/view/ForecastQueryView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/fastapi_demo/frontend/src/view/ForecastQueryView.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -16,6 +17,9 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RESET_MODE" value="HARD" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -89,7 +93,23 @@
       <option name="project" value="LOCAL" />
       <updated>1758432980063</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="divided in css files">
+      <option name="closed" value="true" />
+      <created>1758433117612</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1758433117612</updated>
+    </task>
+    <task id="LOCAL-00005" summary="fixed warnings">
+      <option name="closed" value="true" />
+      <created>1758433402458</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1758433402458</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -110,6 +130,8 @@
     <MESSAGE value="fixed problems" />
     <MESSAGE value="fixed request forecast" />
     <MESSAGE value="fixed graphics" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed graphics" />
+    <MESSAGE value="divided in css files" />
+    <MESSAGE value="fixed warnings" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed warnings" />
   </component>
 </project>

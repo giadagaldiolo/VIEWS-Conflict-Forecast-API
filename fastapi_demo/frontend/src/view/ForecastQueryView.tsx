@@ -66,8 +66,7 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
             }
             try {
                 const url = `${BASE_URL}/${run}/${loa}/${typeOfViolence}/cells?country_id=${selectedCountry.value}`;
-                const res = await fetch(url);
-                const cellsData: number[] = await res.json();
+                const cellsData: number[] = await (await fetch(url)).json();
                 setCellsOptions(cellsData.map(c => ({ value: c, label: c.toString() })));
             } catch (e: unknown) {
                 if (e instanceof Error) setError(e.message);
@@ -94,8 +93,15 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
 
             const text = await res.text();
             const lines: string[] = text.trim().split("\n");
-            const data: ForecastData[] = lines.map(line => JSON.parse(line));
+            const data: ForecastData[] = lines.map(line => {
+                const item = JSON.parse(line);
+
+                // Non serve più filtrare lato frontend, backend ha già fatto il filtro
+                return item;
+            });
+
             onData(data);
+
         } catch (e: unknown) {
             if (e instanceof Error) setError(e.message);
             else setError(String(e));
@@ -104,6 +110,7 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="forecast-query-container">
