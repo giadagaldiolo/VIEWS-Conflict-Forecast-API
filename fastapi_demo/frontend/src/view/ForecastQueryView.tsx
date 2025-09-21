@@ -9,9 +9,20 @@ interface Option {
 }
 
 interface ForecastQueryProps {
+    /**
+     * Callback function to return the fetched forecast data.
+     * @param data - Array of forecast data or null if fetch failed.
+     */
     onData: (data: ForecastData[] | null) => void;
 }
 
+/**
+ * ForecastQueryView component allows users to query the Forecast API.
+ * Users can select run, level of analysis (LoA), type of violence,
+ * months, countries, grid cells (priogrid IDs), and metrics.
+ * The component fetches the corresponding data from the backend API
+ * and passes it back via the `onData` callback.
+ */
 export function ForecastQueryView({ onData }: ForecastQueryProps) {
     const [run, setRun] = useState("preds_001");
     const [loa, setLoa] = useState("pgm");
@@ -32,7 +43,10 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
 
     const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
 
-    // Carica mesi, paesi e metriche all'avvio
+    /**
+     * Fetch available months, countries, and metrics on component mount
+     * or whenever run/loa/typeOfViolence changes.
+     */
     useEffect(() => {
         const fetchLists = async () => {
             try {
@@ -57,7 +71,9 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
         fetchLists();
     }, [run, loa, typeOfViolence, BASE_URL]);
 
-    // Carica priogrid_id solo dopo aver scelto un country
+    /**
+     * Fetch priogrid IDs (cells) once a country is selected.
+     */
     useEffect(() => {
         const fetchCells = async () => {
             if (!selectedCountry) {
@@ -76,6 +92,10 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
         fetchCells();
     }, [selectedCountry, run, loa, typeOfViolence, BASE_URL]);
 
+    /**
+     * Fetch forecast data based on the current selections.
+     * Selected months, country, priogrid cells, and metrics are included in the query.
+     */
     const fetchData = async () => {
         setLoading(true);
         try {
@@ -93,13 +113,9 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
 
             const text = await res.text();
             const lines: string[] = text.trim().split("\n");
-            const data: ForecastData[] = lines.map(line => {
-                const item = JSON.parse(line);
+            const data: ForecastData[] = lines.map(line => JSON.parse(line));
 
-                // Non serve più filtrare lato frontend, backend ha già fatto il filtro
-                return item;
-            });
-
+            // Pass fetched data back to parent component
             onData(data);
 
         } catch (e: unknown) {
@@ -111,11 +127,11 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
         }
     };
 
-
     return (
         <div className="forecast-query-container">
             <h2>Forecast API Query</h2>
 
+            {/* Run / LoA / Type of Violence inputs */}
             <div className="forecast-query-row">
                 <div>
                     <label>Run</label>
@@ -131,6 +147,7 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
                 </div>
             </div>
 
+            {/* Filters: Months, Country, Priogrid, Metrics */}
             <div className="forecast-query-filters">
                 <div>
                     <label>Month</label>
@@ -174,10 +191,12 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
                 </div>
             </div>
 
+            {/* Fetch button */}
             <button className="fetch-button" onClick={fetchData} disabled={loading}>
                 {loading ? "Fetching..." : "Fetch Forecast"}
             </button>
 
+            {/* Error message */}
             {error && <div className="error-message">{error}</div>}
         </div>
     );
