@@ -5,16 +5,22 @@ from dataAccess.interface_parquet_reader import IParquetReader
 
 class ParquetFlatReader(IParquetReader):
     """
-    Lettura ottimizzata di parquet forecasts:
-    - Join dei file main + HDI all'avvio.
-    - Tutte le query successive filtrano il DataFrame in memoria.
-    - Streaming dei record via generator.
+    Optimized reader for forecast parquet files.
+
+    This class loads and joins main and HDI parquet files at initialization,
+    and performs all subsequent queries by filtering the in-memory DataFrame.
+    It streams filtered records one by one using a generator for better performance.
+
+    Attributes:
+        BASE_COLS (List[str]): Columns common to all records.
+        METRIC_COLS (List[str]): List of forecast metric columns.
+
+    Args:
+        base_path (str): Path to the directory containing parquet files.
     """
 
     BASE_COLS = ["priogrid_id", "month_id", "country_id", "lat", "lon", "row", "col"]
 
-
-    # Colonne previste nei valori
     METRIC_COLS = [
         "MAP",
         "HDI_50_lower", "HDI_50_upper",
@@ -25,6 +31,12 @@ class ParquetFlatReader(IParquetReader):
     ]
 
     def __init__(self, base_path: str):
+        """
+        Initialize the reader by loading and joining parquet files.
+
+        Args:
+            base_path (str): Path to the folder containing parquet forecast files.
+        """
         self.base_path = Path(base_path)
         df_main = pl.read_parquet(self.base_path / "preds_001.parquet")
         df_hdi = pl.read_parquet(self.base_path / "preds_001_90_hdi.parquet")
@@ -39,9 +51,18 @@ class ParquetFlatReader(IParquetReader):
         metrics: Optional[List[str]] = None,
     ) -> Iterator[Dict[str, Any]]:
         """
-        Generator che restituisce record filtrati, con eventuale subset di metriche.
-        Streaming riga per riga per performance.
-        Calcola MAP come media delle tre liste di previsioni.
+        Yield filtered forecast records as dictionaries, streaming one row at a time.
+
+        Calculates 'MAP' as the mean of three prediction lists.
+
+        Args:
+            month_ids (Optional[List[int]]): Filter by month IDs.
+            priogrid_ids (Optional[List[int]]): Filter by priogrid IDs.
+            country_ids (Optional[List[int]]): Filter by country IDs.
+            metrics (Optional[List[str]]): Subset of metric columns to include. Defaults to all.
+
+        Yields:
+            Dict[str, Any]: Forecast record with location, time, and requested metric values.
         """
         df = self.df
 
@@ -84,10 +105,8 @@ class ParquetFlatReader(IParquetReader):
                 "prob_threshold_6": row.get("pred_ln_os_prob_hdi_upper"),
             }
 
-            # Filtra solo metriche richieste
             values_dict = {k: v for k, v in values_dict.items() if k in metric_cols}
 
-            # Costruisci record finale
             cell_record = {
                 "priogrid_id": row["priogrid_id"],
                 "lat": row.get("lat"),
@@ -103,10 +122,28 @@ class ParquetFlatReader(IParquetReader):
 
 
     def list_months(self) -> List[int]:
+        """
+        Return all unique month IDs available.
+
+        Returns:
+            List[int]: Sorted list of month IDs.
+        """
         return sorted(self.df.select("month_id").unique().to_series().to_list())
 
     def list_priogrid_ids(self) -> List[int]:
+        """
+        Return all unique priogrid IDs available.
+
+        Returns:
+            List[int]: Sorted list of priogrid IDs.
+        """
         return sorted(self.df.select("priogrid_id").unique().to_series().to_list())
 
     def list_country_ids(self) -> List[int]:
+        """
+        Return all unique country IDs available.
+
+        Returns:
+            List[int]: Sorted list of country IDs.
+        """
         return sorted(self.df.select("country_id").unique().to_series().to_list())
