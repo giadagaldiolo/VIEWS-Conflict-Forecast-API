@@ -110,7 +110,7 @@ ruff .
 
 
 ## File Structure
-
+```
 fastapi_demo/
 ├─ backend/             # FastAPI backend
 │  ├─ application/     # Routes
@@ -133,7 +133,7 @@ fastapi_demo/
 ├─ data/                # Synthetic .parquet files
 ├─ docker-compose.yml
 ├─ README.md
-
+```
 ##Notes
 Backend is typed with pydantic and optionally checked with mypy
 Modular and clean design following Clean Architecture principles
