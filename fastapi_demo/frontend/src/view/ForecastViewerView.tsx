@@ -1,6 +1,15 @@
 import React from "react";
 import { ForecastData } from "../model/forecastModel";
 
+/**
+ * Displays forecast data in a readable JSON format.
+ *
+ * Args:
+ *   data (ForecastData[] | null): The forecast data to display. If null, shows a placeholder message.
+ *
+ * Returns:
+ *   JSX.Element: A React component showing the forecast data or a message if no data is available.
+ */
 interface Props {
     data: ForecastData[] | null;
 }
