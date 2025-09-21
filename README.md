@@ -134,7 +134,7 @@ fastapi_demo/
 ├─ docker-compose.yml
 ├─ README.md
 ```
-##Notes
-Backend is typed with pydantic and optionally checked with mypy
-Modular and clean design following Clean Architecture principles
-Synthetic data allows running the full system in under 15 minutes
+## Notes
+- Backend is typed with pydantic and optionally checked with mypy
+- Modular and clean design following Clean Architecture principles
+- Synthetic data allows running the full system in under 15 minutes
