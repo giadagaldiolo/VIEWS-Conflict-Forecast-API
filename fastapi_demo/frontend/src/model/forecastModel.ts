@@ -1,3 +1,6 @@
+/**
+ * Forecast data returned from the API.
+ */
 export interface ForecastData {
     id: number;
     forecast: number;
@@ -5,16 +8,36 @@ export interface ForecastData {
     [key: string]: any;
 }
 
+/**
+ * Country object with ID and name.
+ */
 export interface Country {
     id: number;
     name: string;
 }
 
+/**
+ * Month object with ID and label.
+ */
 export interface Month {
     id: number;
     label: string;
 }
 
+/**
+ * Fetches forecast data based on given filters.
+ *
+ * @param baseUrl - Base URL of the API.
+ * @param run - API version identifier.
+ * @param loa - Level of analysis.
+ * @param typeOfViolence - Type of violence filter.
+ * @param monthId - Optional month ID to filter forecasts.
+ * @param countryId - Optional country ID to filter forecasts.
+ * @param priogridId - Optional priogrid ID to filter forecasts.
+ * @param metrics - Optional comma-separated list of metrics.
+ * @returns Promise resolving to an array of ForecastData.
+ * @throws Error if the HTTP response is not OK.
+ */
 export async function fetchForecasts(
     baseUrl: string,
     run: string,
@@ -44,16 +67,34 @@ export async function fetchForecasts(
     return lines.map(line => JSON.parse(line));
 }
 
+/**
+ * Fetches the list of countries from the API.
+ *
+ * @param baseUrl - Base URL of the API.
+ * @returns Promise resolving to an array of Country objects.
+ */
 export async function fetchCountries(baseUrl: string): Promise<Country[]> {
     const res = await fetch(`${baseUrl}/api/countries`);
     return res.json();
 }
 
+/**
+ * Fetches the list of months from the API.
+ *
+ * @param baseUrl - Base URL of the API.
+ * @returns Promise resolving to an array of Month objects.
+ */
 export async function fetchMonths(baseUrl: string): Promise<Month[]> {
     const res = await fetch(`${baseUrl}/api/months`);
     return res.json();
 }
 
+/**
+ * Fetches the list of available metrics from the API.
+ *
+ * @param baseUrl - Base URL of the API.
+ * @returns Promise resolving to an array of metric strings.
+ */
 export async function fetchMetrics(baseUrl: string): Promise<string[]> {
     const res = await fetch(`${baseUrl}/api/metrics`);
     return res.json();
