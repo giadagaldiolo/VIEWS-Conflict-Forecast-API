@@ -6,3 +6,4 @@ fatalities002_2025_07_t01_cm.csv
 .ruff_cache
 node_modules
 .mypy_cache
+venv
