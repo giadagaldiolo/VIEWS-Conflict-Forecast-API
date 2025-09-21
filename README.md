@@ -82,7 +82,7 @@ Access services:
 Everything runs with the synthetic data included.
 
 ## Running Locally Without Docker
-# Backend
+### Backend
 
 cd fastapi_demo/backend
 python -m venv venv
@@ -95,7 +95,7 @@ Install dependencies: pip install -r requirements.txt
 Run the backend: uvicorn main:app --reload
 API Docs: http://127.0.0.1:8000/docs
 
-# Frontend
+### Frontend
 
 cd fastapi_demo/frontend
 npm install --legacy-peer-deps
