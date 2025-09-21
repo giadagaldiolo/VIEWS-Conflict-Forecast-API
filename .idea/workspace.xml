@@ -4,13 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="771760b4-0b27-4add-af3e-f473ec90b863" name="Changes" comment="fixed request forecast">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastapi_demo/backend/application/router_application.py" beforeDir="false" afterPath="$PROJECT_DIR$/fastapi_demo/backend/application/router_application.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastapi_demo/backend/business/cell/cell_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/fastapi_demo/backend/business/cell/cell_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastapi_demo/backend/dataAccess/parquet_reader.py" beforeDir="false" afterPath="$PROJECT_DIR$/fastapi_demo/backend/dataAccess/parquet_reader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastapi_demo/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/fastapi_demo/frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastapi_demo/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/fastapi_demo/frontend/package.json" afterDir="false" />
+    <list default="true" id="771760b4-0b27-4add-af3e-f473ec90b863" name="Changes" comment="fixed graphics">
+      <change afterPath="$PROJECT_DIR$/fastapi_demo/frontend/src/view/ForecastQueryView.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fastapi_demo/frontend/src/view/ForecastQueryView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/fastapi_demo/frontend/src/view/ForecastQueryView.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -86,7 +81,15 @@
       <option name="project" value="LOCAL" />
       <updated>1758397543152</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="fixed graphics">
+      <option name="closed" value="true" />
+      <created>1758432980063</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1758432980063</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -106,6 +109,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="fixed problems" />
     <MESSAGE value="fixed request forecast" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed request forecast" />
+    <MESSAGE value="fixed graphics" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed graphics" />
   </component>
 </project>

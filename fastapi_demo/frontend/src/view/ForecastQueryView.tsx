@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import { ForecastData } from "../model/forecastModel";
+import "./ForecastQueryView.css"; // <-- importa il CSS
 
 interface Option {
     value: string | number;
@@ -31,7 +32,6 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
 
     const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
 
-    // Carica mesi, countries e metriche all'avvio
     useEffect(() => {
         const fetchLists = async () => {
             try {
@@ -50,7 +50,6 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
         fetchLists();
     }, [run, loa, typeOfViolence]);
 
-    // Carica priogrid_id solo dopo aver scelto un country
     useEffect(() => {
         const fetchCells = async () => {
             if (!selectedCountry) {
@@ -96,26 +95,26 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
     };
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1rem", border: "1px solid #ccc", borderRadius: "8px", backgroundColor: "#f9f9f9" }}>
+        <div className="forecast-query-container">
             <h2>Forecast API Query</h2>
 
-            <div style={{ display: "flex", gap: "1rem" }}>
-                <div style={{ flex: 1 }}>
+            <div className="forecast-query-row">
+                <div>
                     <label>Run</label>
-                    <input value={run} onChange={e => setRun(e.target.value)} style={{ width: "100%", padding: "0.3rem", marginTop: "0.2rem" }} />
+                    <input value={run} onChange={e => setRun(e.target.value)} />
                 </div>
-                <div style={{ flex: 1 }}>
+                <div>
                     <label>LoA</label>
-                    <input value={loa} onChange={e => setLoa(e.target.value)} style={{ width: "100%", padding: "0.3rem", marginTop: "0.2rem" }} />
+                    <input value={loa} onChange={e => setLoa(e.target.value)} />
                 </div>
-                <div style={{ flex: 1 }}>
+                <div>
                     <label>Type of Violence</label>
-                    <input value={typeOfViolence} onChange={e => setTypeOfViolence(e.target.value)} style={{ width: "100%", padding: "0.3rem", marginTop: "0.2rem" }} />
+                    <input value={typeOfViolence} onChange={e => setTypeOfViolence(e.target.value)} />
                 </div>
             </div>
 
-            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-                <div style={{ flex: 1 }}>
+            <div className="forecast-query-filters">
+                <div>
                     <label>Month</label>
                     <Select
                         options={monthsOptions}
@@ -125,7 +124,7 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
                         placeholder="Select months..."
                     />
                 </div>
-                <div style={{ flex: 1 }}>
+                <div>
                     <label>Country</label>
                     <Select
                         options={countriesOptions}
@@ -134,7 +133,7 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
                         placeholder="Select a country..."
                     />
                 </div>
-                <div style={{ flex: 1 }}>
+                <div>
                     <label>Priogrid</label>
                     <Select
                         options={cellsOptions}
@@ -145,7 +144,7 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
                         isDisabled={!selectedCountry}
                     />
                 </div>
-                <div style={{ flex: 1 }}>
+                <div>
                     <label>Metrics</label>
                     <Select
                         options={metricsOptions}
@@ -157,15 +156,11 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
                 </div>
             </div>
 
-            <button
-                onClick={fetchData}
-                disabled={loading}
-                style={{ padding: "0.5rem 1rem", backgroundColor: "#4CAF50", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}
-            >
+            <button className="fetch-button" onClick={fetchData} disabled={loading}>
                 {loading ? "Fetching..." : "Fetch Forecast"}
             </button>
 
-            {error && <div style={{ color: "red" }}>{error}</div>}
+            {error && <div className="error-message">{error}</div>}
         </div>
     );
 }
