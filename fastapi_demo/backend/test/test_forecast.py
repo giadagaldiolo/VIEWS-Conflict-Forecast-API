@@ -1,4 +1,26 @@
-# test/test_forecasts_full.py
+"""
+Integration tests for forecast API endpoints.
+
+This module contains integration tests verifying the correctness and expected behavior of forecast-related API routes.
+
+The tested endpoints include:
+- `/months`: Returns available forecast months.
+- `/cells`: Returns available priogrid cell IDs.
+- `/countries`: Returns available country IDs.
+- `/forecasts`: Returns forecast data filtered by month, priogrid, country, and requested metrics.
+
+Tests cover:
+- Endpoint availability and response structure.
+- Retrieval of forecasts for single and multiple cells/months.
+- Filtering by country ID.
+- Handling empty result sets.
+- Validation of requested metrics, including error handling for invalid inputs.
+- Verification of forecast data types and value ranges (e.g., probabilities between 0 and 1).
+
+Usage:
+    Run the tests using pytest to ensure API functionality remains consistent.
+"""
+
 import pytest
 import json
 from fastapi.testclient import TestClient
@@ -44,6 +66,16 @@ def parse_response(response):
     "/api/preds_001/pgm/sb/countries"
 ])
 def test_basic_info(endpoint):
+    """
+    Test that basic info endpoints respond successfully and return non-empty lists.
+
+    Args:
+        endpoint (str): API endpoint to test (months, cells, countries).
+
+    Asserts:
+        - HTTP status code is 200.
+        - Returned data is a non-empty list.
+    """
     response = client.get(endpoint)
     assert response.status_code == 200
     data = parse_response(response)
@@ -51,6 +83,13 @@ def test_basic_info(endpoint):
     assert len(data) > 0
 
 def test_forecasts_single_cell_all_metrics():
+    """
+    Test forecast retrieval for a single cell and month with all available metrics.
+
+    Verifies presence of metadata fields and that metric values are within expected ranges:
+    - Probability metrics between 0 and 1.
+    - HDI and best predictions as floats or lists of floats.
+    """
     params = {
         "month_id": 409,
         "priogrid_id": [62356],
