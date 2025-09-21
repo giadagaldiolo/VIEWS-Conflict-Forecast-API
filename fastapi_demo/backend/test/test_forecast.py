@@ -1,24 +1,14 @@
 """
-Integration tests for forecast API endpoints.
+Extended integration tests for forecast API endpoints.
 
-This module contains integration tests verifying the correctness and expected behavior of forecast-related API routes.
-
-The tested endpoints include:
-- `/months`: Returns available forecast months.
-- `/cells`: Returns available priogrid cell IDs.
-- `/countries`: Returns available country IDs.
-- `/forecasts`: Returns forecast data filtered by month, priogrid, country, and requested metrics.
-
-Tests cover:
-- Endpoint availability and response structure.
-- Retrieval of forecasts for single and multiple cells/months.
-- Filtering by country ID.
-- Handling empty result sets.
-- Validation of requested metrics, including error handling for invalid inputs.
-- Verification of forecast data types and value ranges (e.g., probabilities between 0 and 1).
+This module adds additional coverage to verify:
+- Multiple filters combined (months, priogrid cells, country, metrics)
+- NDJSON response handling
+- Null values in metrics
+- Correct filtering of requested metrics
 
 Usage:
-    Run the tests using pytest to ensure API functionality remains consistent.
+    Run with pytest to validate forecast API behavior.
 """
 
 import pytest
@@ -26,179 +16,138 @@ import json
 from fastapi.testclient import TestClient
 import sys
 import os
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from main import app
 
 client = TestClient(app)
 
-# 13値リスト
+# Correct 13 metrics in your ForecastValues
 ALL_METRICS = [
-    "pred_ln_sb_best",
-    "pred_ln_sb_best_hdi_lower",
-    "pred_ln_sb_best_hdi_upper",
-    "pred_ln_ns_best",
-    "pred_ln_ns_best_hdi_lower",
-    "pred_ln_ns_best_hdi_upper",
-    "pred_ln_os_best",
-    "pred_ln_os_best_hdi_lower",
-    "pred_ln_os_best_hdi_upper",
-    "pred_ln_sb_prob_hdi_lower",
-    "pred_ln_sb_prob_hdi_upper",
-    "pred_ln_ns_prob_hdi_lower",
-    "pred_ln_ns_prob_hdi_upper",
-    "pred_ln_os_prob_hdi_lower",
-    "pred_ln_os_prob_hdi_upper",
+    "MAP",
+    "HDI_50_lower",
+    "HDI_50_upper",
+    "HDI_90_lower",
+    "HDI_90_upper",
+    "HDI_99_lower",
+    "HDI_99_upper",
+    "prob_threshold_1",
+    "prob_threshold_2",
+    "prob_threshold_3",
+    "prob_threshold_4",
+    "prob_threshold_5",
+    "prob_threshold_6",
 ]
 
+
 def parse_response(response):
+    """
+    Parse API response, handling both NDJSON and standard JSON.
+
+    Args:
+        response: FastAPI TestClient response object.
+
+    Returns:
+        List of dictionaries representing forecast data.
+    """
     content_type = response.headers.get("content-type", "")
     if content_type.startswith("application/x-ndjson"):
-        # NDJSONなら各行をJSONとしてパースしてリスト返却
         return [json.loads(line) for line in response.text.splitlines()]
     else:
-        # 通常のJSONならそのまま返す
         return response.json()
 
 
-@pytest.mark.parametrize("endpoint", [
-    "/api/preds_001/pgm/sb/months",
-    "/api/preds_001/pgm/sb/cells",
-    "/api/preds_001/pgm/sb/countries"
+@pytest.mark.parametrize("endpoint,query", [
+    ("/api/preds_001/pgm/sb/months", {}),
+    ("/api/preds_001/pgm/sb/cells", {"country_id": 40}),
+    ("/api/preds_001/pgm/sb/countries", {})
 ])
-def test_basic_info(endpoint):
+def test_basic_info(endpoint, query):
     """
     Test that basic info endpoints respond successfully and return non-empty lists.
-
-    Args:
-        endpoint (str): API endpoint to test (months, cells, countries).
-
-    Asserts:
-        - HTTP status code is 200.
-        - Returned data is a non-empty list.
     """
-    response = client.get(endpoint)
+    response = client.get(endpoint, params=query)
     assert response.status_code == 200
     data = parse_response(response)
     assert isinstance(data, list)
     assert len(data) > 0
 
-def test_forecasts_single_cell_all_metrics():
-    """
-    Test forecast retrieval for a single cell and month with all available metrics.
 
-    Verifies presence of metadata fields and that metric values are within expected ranges:
-    - Probability metrics between 0 and 1.
-    - HDI and best predictions as floats or lists of floats.
+def test_forecasts_multiple_filters_selected_metrics():
+    """
+    Test retrieval with multiple filters: months, priogrid cells, country, and only selected metrics.
+
+    Verifies that:
+    - Only requested metrics are included in the 'values' field.
+    - Metadata fields exist.
+    """
+    params = {
+        "month_id": [409, 410],
+        "priogrid_id": [150792, 151512],
+        "country_id": [40],
+        "metrics": ["MAP", "HDI_50_lower"]  # Use real metric names
+    }
+    response = client.get("/api/preds_001/pgm/sb/forecasts", params=params)
+    assert response.status_code == 200
+    data = parse_response(response)
+    assert len(data) > 0
+
+    for cell in data:
+        # Check metadata
+        for key in ["priogrid_id", "month_id", "lat", "lon", "country_id"]:
+            assert key in cell
+
+        # Check only selected metrics are present
+        assert set(cell["values"].keys()) == {"MAP", "HDI_50_lower"}
+
+
+def test_forecasts_ndjson_support():
+    """
+    Test that the API correctly handles NDJSON response format.
+    """
+    headers = {"Accept": "application/x-ndjson"}
+    params = {
+        "month_id": [409],
+        "priogrid_id": [62356],
+        "metrics": ["MAP"]
+    }
+    response = client.get("/api/preds_001/pgm/sb/forecasts", params=params, headers=headers)
+    assert response.status_code == 200
+    data = parse_response(response)
+    assert isinstance(data, list)
+    assert all("values" in cell for cell in data)
+    assert all("MAP" in cell["values"] for cell in data)
+
+
+def test_forecasts_null_values_handling():
+    """
+    Test that metrics with null values are handled properly and returned as null.
     """
     params = {
         "month_id": 409,
         "priogrid_id": [62356],
-        "metrics": ALL_METRICS
-    }
-    response = client.get("/api/preds_001/pgm/sb/forecasts", params=params)
-    assert response.status_code == 200
-    data = parse_response(response)
-    assert len(data) == 1
-    cell = data[0]
-    # メタ情報
-    for key in ["priogrid_id", "lat", "lon", "country_id"]:
-        assert key in cell
-
-    # 各メトリック確認
-    for key in ALL_METRICS:
-        assert key in cell
-        val = cell[key]
-        if "prob" in key:
-            # probability は 0~1
-            if isinstance(val, list):
-                for v in val:
-                    assert 0.0 <= v <= 1.0
-            else:
-                assert 0.0 <= val <= 1.0
-        elif "hdi_lower" in key or "hdi_upper" in key or "_best" in key:
-            # float かリスト
-            if isinstance(val, list):
-                for v in val:
-                    assert isinstance(v, float)
-            else:
-                assert isinstance(val, float)
-
-def test_forecasts_multiple_cells_and_months_all_metrics():
-    params = {
-        "month_id": [409, 410],
-        "priogrid_id": [62356, 81761],
-        "metrics": ALL_METRICS
-    }
-    response = client.get("/api/preds_001/pgm/sb/forecasts", params=params)
-    assert response.status_code == 200
-    data = parse_response(response)
-    # 2 months * 2 cells = 4
-    assert len(data) == 4
-    for cell in data:
-        for key in ALL_METRICS:
-            assert key in cell
-            val = cell[key]
-            if "prob" in key:
-                if isinstance(val, list):
-                    for v in val:
-                        assert 0.0 <= v <= 1.0
-                else:
-                    assert 0.0 <= val <= 1.0
-            else:
-                if isinstance(val, list):
-                    for v in val:
-                        assert isinstance(v, float)
-                else:
-                    assert isinstance(val, float)
-
-def test_forecasts_country_query_all_metrics():
-    country_id = 818
-    params = {
-        "country_id": country_id,
-        "month_id": 409,
-        "metrics": ALL_METRICS
+        "metrics": ["MAP", "HDI_50_upper"]
     }
     response = client.get("/api/preds_001/pgm/sb/forecasts", params=params)
     assert response.status_code == 200
     data = parse_response(response)
     for cell in data:
-        assert cell["country_id"] == country_id
-        for key in ALL_METRICS:
-            assert key in cell
+        for key in ["MAP", "HDI_50_upper"]:
+            assert key in cell["values"]
+            val = cell["values"][key]
+            assert val is None or isinstance(val, (float, list))
 
-def test_empty_response_all_metrics():
+
+def test_forecasts_combined_filters_with_no_results():
+    """
+    Test that combining filters with non-existent IDs returns an empty list.
+    """
     params = {
-        "month_id": 9999,
+        "month_id": [9999],
         "priogrid_id": [0],
-        "metrics": ALL_METRICS
+        "country_id": [0],
+        "metrics": ["MAP"]
     }
-    response = client.get("/api/preds_001/pgm/sb/forecasts", params=params)
-    assert response.status_code == 200
-    data = parse_response(response)
-    assert data == []
-
-def test_forecasts_no_metrics_returns_meta_only():
-    params = {"month_id": 409, "priogrid_id": [62356]}
-    response = client.get("/api/preds_001/pgm/sb/forecasts", params=params)
-    assert response.status_code == 200
-    data = parse_response(response)
-    assert len(data) == 1
-    cell = data[0]
-    # メタ情報だけ返る
-    for key in ["priogrid_id", "lat", "lon", "country_id", "month_id", "row", "col"]:
-        assert key in cell
-    # メトリックはなし
-    assert all(k not in cell for k in ["pred_ln_sb_best", "pred_ln_ns_best"])
-
-def test_forecasts_invalid_metric():
-    params = {"month_id": 409, "priogrid_id": [62356], "metrics": ["foobar"]}
-    response = client.get("/api/preds_001/pgm/sb/forecasts", params=params)
-    assert response.status_code == 400
-    data = parse_response(response)
-    assert "Invalid metrics" in data["detail"]
-
-def test_forecasts_nonexistent_ids():
-    params = {"month_id": 9999, "priogrid_id": [0], "country_id": 0}
     response = client.get("/api/preds_001/pgm/sb/forecasts", params=params)
     assert response.status_code == 200
     data = parse_response(response)

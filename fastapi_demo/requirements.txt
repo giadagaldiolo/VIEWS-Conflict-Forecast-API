@@ -1,6 +1,0 @@
-fastapi
-uvicorn[standard]
-polars[all]
-pydantic
-pytest
-ruff
