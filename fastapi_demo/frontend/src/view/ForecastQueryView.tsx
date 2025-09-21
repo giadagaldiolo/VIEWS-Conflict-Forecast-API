@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import Select from "react-select";
+import Select, { MultiValue, SingleValue } from "react-select";
 import { ForecastData } from "../model/forecastModel";
-import "./ForecastQueryView.css"; // <-- importa il CSS
+import "./ForecastQueryView.css";
 
 interface Option {
     value: string | number;
@@ -32,6 +32,7 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
 
     const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
 
+    // Carica mesi, paesi e metriche all'avvio
     useEffect(() => {
         const fetchLists = async () => {
             try {
@@ -40,16 +41,23 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
                     fetch(`${BASE_URL}/${run}/${loa}/${typeOfViolence}/countries`),
                     fetch(`${BASE_URL}/${run}/${loa}/${typeOfViolence}/metrics`),
                 ]);
-                setMonthsOptions((await monthsRes.json()).map((m: number) => ({ value: m, label: m.toString() })));
-                setCountriesOptions((await countriesRes.json()).map((c: number) => ({ value: c, label: c.toString() })));
-                setMetricsOptions((await metricsRes.json()).map((m: string) => ({ value: m, label: m })));
-            } catch (e: any) {
-                setError(e.message);
+
+                const monthsData: number[] = await monthsRes.json();
+                const countriesData: number[] = await countriesRes.json();
+                const metricsData: string[] = await metricsRes.json();
+
+                setMonthsOptions(monthsData.map(m => ({ value: m, label: m.toString() })));
+                setCountriesOptions(countriesData.map(c => ({ value: c, label: c.toString() })));
+                setMetricsOptions(metricsData.map(m => ({ value: m, label: m })));
+            } catch (e: unknown) {
+                if (e instanceof Error) setError(e.message);
+                else setError(String(e));
             }
         };
         fetchLists();
-    }, [run, loa, typeOfViolence]);
+    }, [run, loa, typeOfViolence, BASE_URL]);
 
+    // Carica priogrid_id solo dopo aver scelto un country
     useEffect(() => {
         const fetchCells = async () => {
             if (!selectedCountry) {
@@ -59,14 +67,15 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
             try {
                 const url = `${BASE_URL}/${run}/${loa}/${typeOfViolence}/cells?country_id=${selectedCountry.value}`;
                 const res = await fetch(url);
-                const data = await res.json();
-                setCellsOptions(data.map((c: number) => ({ value: c, label: c.toString() })));
-            } catch (e: any) {
-                setError(e.message);
+                const cellsData: number[] = await res.json();
+                setCellsOptions(cellsData.map(c => ({ value: c, label: c.toString() })));
+            } catch (e: unknown) {
+                if (e instanceof Error) setError(e.message);
+                else setError(String(e));
             }
         };
         fetchCells();
-    }, [selectedCountry, run, loa, typeOfViolence]);
+    }, [selectedCountry, run, loa, typeOfViolence, BASE_URL]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -82,12 +91,14 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
             const url = `${BASE_URL}/${segments.join("/")}?${params.toString()}`;
             const res = await fetch(url);
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
             const text = await res.text();
-            const lines = text.trim().split("\n");
-            const data = lines.map(line => JSON.parse(line));
+            const lines: string[] = text.trim().split("\n");
+            const data: ForecastData[] = lines.map(line => JSON.parse(line));
             onData(data);
-        } catch (e: any) {
-            setError(e.message);
+        } catch (e: unknown) {
+            if (e instanceof Error) setError(e.message);
+            else setError(String(e));
             onData(null);
         } finally {
             setLoading(false);
@@ -119,7 +130,7 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
                     <Select
                         options={monthsOptions}
                         value={selectedMonths}
-                        onChange={val => setSelectedMonths(val as Option[])}
+                        onChange={(val: MultiValue<Option>) => setSelectedMonths(val as Option[])}
                         isMulti
                         placeholder="Select months..."
                     />
@@ -129,7 +140,7 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
                     <Select
                         options={countriesOptions}
                         value={selectedCountry}
-                        onChange={val => setSelectedCountry(val as Option)}
+                        onChange={(val: SingleValue<Option>) => setSelectedCountry(val as Option)}
                         placeholder="Select a country..."
                     />
                 </div>
@@ -138,7 +149,7 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
                     <Select
                         options={cellsOptions}
                         value={selectedCells}
-                        onChange={val => setSelectedCells(val as Option[])}
+                        onChange={(val: MultiValue<Option>) => setSelectedCells(val as Option[])}
                         isMulti
                         placeholder="Select cells..."
                         isDisabled={!selectedCountry}
@@ -149,7 +160,7 @@ export function ForecastQueryView({ onData }: ForecastQueryProps) {
                     <Select
                         options={metricsOptions}
                         value={selectedMetrics}
-                        onChange={val => setSelectedMetrics(val as Option[])}
+                        onChange={(val: MultiValue<Option>) => setSelectedMetrics(val as Option[])}
                         isMulti
                         placeholder="Select metrics..."
                     />
