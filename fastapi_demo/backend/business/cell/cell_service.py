@@ -7,4 +7,4 @@ class CellService(ICellService):
         self.repository = repository
 
     def get_cells(self) -> List[int]:
-        return self.repository.list_priogrid_ids()
+        return self.repository.list_cells()

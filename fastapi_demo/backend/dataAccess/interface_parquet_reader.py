@@ -27,7 +27,7 @@ class IParquetReader(ABC):
         pass
 
     @abstractmethod
-    def list_priogrid_ids(self) -> List[int]:
+    def list_cells(self) -> List[int]:
         """Restituisce tutti i priogrid_id disponibili"""
         pass
 

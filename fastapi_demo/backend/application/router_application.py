@@ -50,11 +50,15 @@ def list_months(run: str, loa: str, type_of_violence: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{run}/{loa}/{type_of_violence}/cells", response_model=List[int])
-def list_cells(run: str, loa: str, type_of_violence: str):
+def list_cells(run: str, loa: str, type_of_violence: str, country_id: int):
     try:
-        return cell_service.get_cells()
+        all_cells = cell_service.get_cells()
+        filtered = [c["priogrid_id"] for c in all_cells if c.get("country_id") == country_id]
+        return filtered
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
 
 @router.get("/{run}/{loa}/{type_of_violence}/countries", response_model=List[int])
 def list_countries(run: str, loa: str, type_of_violence: str):

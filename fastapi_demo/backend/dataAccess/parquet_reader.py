@@ -105,8 +105,14 @@ class ParquetFlatReader(IParquetReader):
     def list_months(self) -> List[int]:
         return sorted(self.df.select("month_id").unique().to_series().to_list())
 
-    def list_priogrid_ids(self) -> List[int]:
-        return sorted(self.df.select("priogrid_id").unique().to_series().to_list())
+    def list_cells(self) ->  List[Dict[str, Any]]:
+        """
+        Restituisce tutte le celle con priogrid_id, country_id, lat e lon.
+        """
+        df = self.df.select(["priogrid_id", "country_id", "lat", "lon"]).unique()
+        return df.to_dicts()  # restituisce lista di dizionari
+
+
 
     def list_country_ids(self) -> List[int]:
         return sorted(self.df.select("country_id").unique().to_series().to_list())
