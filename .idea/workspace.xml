@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="771760b4-0b27-4add-af3e-f473ec90b863" name="Changes" comment="fixed warnings">
+    <list default="true" id="771760b4-0b27-4add-af3e-f473ec90b863" name="Changes" comment="frontend displays only selected metrics">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastapi_demo/backend/application/router_application.py" beforeDir="false" afterPath="$PROJECT_DIR$/fastapi_demo/backend/application/router_application.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastapi_demo/frontend/src/view/ForecastQueryView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/fastapi_demo/frontend/src/view/ForecastQueryView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fastapi_demo/backend/dataAccess/parquet_reader.py" beforeDir="false" afterPath="$PROJECT_DIR$/fastapi_demo/backend/dataAccess/parquet_reader.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -109,7 +108,15 @@
       <option name="project" value="LOCAL" />
       <updated>1758433402458</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="frontend displays only selected metrics">
+      <option name="closed" value="true" />
+      <created>1758434522044</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1758434522044</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -132,6 +139,7 @@
     <MESSAGE value="fixed graphics" />
     <MESSAGE value="divided in css files" />
     <MESSAGE value="fixed warnings" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed warnings" />
+    <MESSAGE value="frontend displays only selected metrics" />
+    <option name="LAST_COMMIT_MESSAGE" value="frontend displays only selected metrics" />
   </component>
 </project>

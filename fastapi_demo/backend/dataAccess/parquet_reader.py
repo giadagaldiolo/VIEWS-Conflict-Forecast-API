@@ -130,23 +130,14 @@ class ParquetFlatReader(IParquetReader):
         """
         return sorted(self.df.select("month_id").unique().to_series().to_list())
 
+
+
     def list_cells(self) -> List[Dict[str, Any]]:
         """
-        Return all unique priogrid IDs available.
-
-        Returns:
-            List[int]: Sorted list of priogrid IDs.
+        Returns all cells with their priogrid_id, country_id, latitude, and longitude.
         """
         df = self.df.select(["priogrid_id", "country_id", "lat", "lon"]).unique()
-                return df.to_dicts()
-
-
-    def list_cells(self) ->  List[Dict[str, Any]]:
-        """
-        Restituisce tutte le celle con priogrid_id, country_id, lat e lon.
-        """
-        df = self.df.select(["priogrid_id", "country_id", "lat", "lon"]).unique()
-        return df.to_dicts()  # restituisce lista di dizionari
+        return df.to_dicts()  # returns a list of dictionaries
 
 
 
