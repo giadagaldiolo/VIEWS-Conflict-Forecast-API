@@ -4,7 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="771760b4-0b27-4add-af3e-f473ec90b863" name="Changes" comment="fixed tests">
+    <list default="true" id="771760b4-0b27-4add-af3e-f473ec90b863" name="Changes" comment="added docstrings">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -131,7 +132,23 @@
       <option name="project" value="LOCAL" />
       <updated>1758436892586</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="added docstrings">
+      <option name="closed" value="true" />
+      <created>1758438483305</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1758438483305</updated>
+    </task>
+    <task id="LOCAL-00010" summary="added docstrings">
+      <option name="closed" value="true" />
+      <created>1758438551361</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1758438551361</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -157,6 +174,7 @@
     <MESSAGE value="frontend displays only selected metrics" />
     <MESSAGE value="merged" />
     <MESSAGE value="fixed tests" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed tests" />
+    <MESSAGE value="added docstrings" />
+    <option name="LAST_COMMIT_MESSAGE" value="added docstrings" />
   </component>
 </project>
