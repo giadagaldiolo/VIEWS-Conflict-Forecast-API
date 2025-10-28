@@ -1,4 +1,5 @@
 # VIEWS Conflict Forecast API
+> 3rd Place at JunctionXOulu 2025 Hackathon, *VIEWS Challenge*
 
 ## Overview
 
